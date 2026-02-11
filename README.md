@@ -63,4 +63,78 @@ Before setting this up, ensure you have the following:
 2.  Install dependencies:
 ```bash
 pip install flask google-ads
+```
+3.  Place your `google-ads.yaml` file in the same directory.
+4.  Edit api.py and set a strong API_KEY (this key authorizes the Relay to talk to this API).
+5.  Run the service (recommended to run via systemd or screen for persistence):
+
+```bash
+python api.py
+```
+*Runs on port 5000 by default.*
+Step 2: The Relay (PHP Middleware)
+This component sits between WordPress and the Python API.
+
+1.  Upload relay.php to your server (can be the same server as WP or a different one).
+2.  Edit the file to configure:
+RELAY_KEY: A secret key shared between the WordPress Plugin and this Relay.
+`$ads_api_key`: The key you defined in Step 1 (Python API).
+`$ads_base_url`: The IP/URL where api.py is running (e.g., http://YOUR_SERVER_IP:5000).
+(Optional) Telegram bot_token and chat_id.
+
+
+### Step 3: The Sensor (WordPress Plugin)
+This component tracks the clicks.
+
+Zip the wp-gads-circuit-breaker folder and install it as a standard WordPress plugin.
+Activate the plugin.
+Go to Settings > Anti Attack GAds.
+Fill in the configuration:
+Google Ads Customer ID: Your account ID (e.g., 1234567890).
+Relay URL: The full URL to your relay.php file (Required for auto-pause).
+Security Key: Must match RELAY_KEY from Step 2.
+URL Parameter: The parameter used for tracking (e.g., gad_campaignid).
+
+
+### ⚙️ Configuration Guide
+Defining Campaigns
+In the WordPress plugin settings, define your campaigns in the text area using the following format (one per line):
+
+unique_slug | Campaign Title | ID_1,ID_2 | Threshold (Optional)
+
+*   **unique_slug:** An internal identifier for logs.
+*   **Campaign Title:** Human-readable name for alerts.
+*   **ID_1, ID_2:** The Campaign IDs or AdGroup IDs passed in the URL parameter.
+*   **Threshold:** (Optional) Overrides the global click threshold for this specific campaign.
+
+**Examples:**
+
+text
+# Use global threshold (e.g., 50 clicks)
+samsung_fridge | Samsung Fridge Sale | 23071363905,23071364000
+
+# Use custom threshold (e.g., 20 clicks)
+iphone_repair | iPhone Repair Service | 8844112233 | 20
+
+### URL Parameter
+Your Google Ads Final URL suffix should include the ID you mapped above.
+Example: `https://yoursite.com/landing-page/?gad_campaignid=23071363905`
+
+---
+
+## 🔒 Security Best Practices
+
+1.  **Protect `api.py`:** Use a firewall (UFW/IPTables) to restrict access to port 5000. Only allow the IP address of the server hosting `relay.php`.
+2.  **HTTPS:** Ideally, serve `relay.php` over HTTPS.
+3.  **Secrets:** Never commit `google-ads.yaml` or files containing real API keys to public repositories.
+
+---
+
+## ⚠️ Disclaimer
+
+This tool is a **mitigation strategy** and does not guarantee 100% protection against invalid traffic. It is designed to minimize budget loss by reacting faster than standard reporting tools. Use at your own risk. The authors are not responsible for any campaign suspensions or lost revenue.
+
+---
+
+**Developed by [MHKEY81]**
 
