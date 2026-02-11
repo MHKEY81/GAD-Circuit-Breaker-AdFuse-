@@ -133,8 +133,3 @@ Example: `https://yoursite.com/landing-page/?gad_campaignid=23071363905`
 ## ⚠️ Disclaimer
 
 This tool is a **mitigation strategy** and does not guarantee 100% protection against invalid traffic. It is designed to minimize budget loss by reacting faster than standard reporting tools. Use at your own risk. The authors are not responsible for any campaign suspensions or lost revenue.
-
----
-
-**Developed by [MHKEY81]**
-
